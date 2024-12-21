@@ -1,11 +1,9 @@
-import React from "react";
+import React from 'react';
 
-import Title from "../components/ui/Title";
+import Title from '../components/ui/Title';
 
 function NoMatch(): React.ReactElement {
-    return (
-        <Title title="Not found" icon="" />
-    );
+  return <Title title="Not found" icon="" />;
 }
 
 export default NoMatch;

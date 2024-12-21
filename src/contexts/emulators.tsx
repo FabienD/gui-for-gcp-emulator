@@ -1,80 +1,56 @@
-import { createContext, useState } from "react";
+import { createContext, useState } from 'react';
 
-export type EmulatorType = {
-    type: string
-    is_connected?: boolean
-    host: string
-    port: number
-    project_id: string
-}
-
-export type EmulatorContextType = {
-    emulators: EmulatorType[]|null;
-    saveEmulator: (emulator: EmulatorType) => void;
-    removeEmulator: (type: string) => void;
-    isEmulatorTypeConnected: (type: string) => boolean;
-    getEmulatorByType: (type: string) => EmulatorType|undefined;
+export type Emulator = {
+  host: string;
+  port: number;
+  project_id: string;
+  is_connected: boolean;
 };
 
-const EmulatorContext = createContext<EmulatorContextType|null>(null);
+export type EmulatorContextType = {
+  emulator: Emulator | undefined;
+  saveEmulator: (emulator: Emulator) => void;
+  isConnected: () => boolean;
+  getEmulator: () => Emulator | undefined;
+};
 
-function EmulatorProvider({ children }: { children: React.ReactNode }): React.ReactElement {
-    const [emulators, setEmulator] = useState<EmulatorType[]>([]);
-    
-    const saveEmulator = (emulator: EmulatorType): void => {
-        const otherEmulators: EmulatorType[] = emulators.filter((e: EmulatorType) => {    
-            return e.type != emulator.type;
-        })
+const EmulatorContext = createContext<EmulatorContextType | null>(null);
 
-        setEmulator([...otherEmulators, emulator]);
+function EmulatorProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
+  const [emulator, setEmulator] = useState<Emulator>();
+
+  const saveEmulator = (emulator: Emulator): void => {
+    setEmulator(emulator);
+  };
+
+  const isConnected = (): boolean => {
+    if (emulator !== undefined) {
+      return emulator.is_connected;
     }
 
-    const removeEmulator = (type: string): void => {
-        const otherEmulators: EmulatorType[] = emulators.filter((e: EmulatorType) => {    
-            return e.type != type;
-        })
+    return false;
+  };
 
-        setEmulator([...otherEmulators]);
-    }
+  const getEmulator = (): Emulator | undefined => {
+    return emulator;
+  };
 
-    const isEmulatorTypeConnected = (type: string): boolean => {
-        let isConnected = false;
+  const valueToShare = {
+    emulator,
+    saveEmulator,
+    isConnected,
+    getEmulator,
+  };
 
-        emulators?.map((emulator: EmulatorType) => {
-            if (emulator.type == type && emulator.is_connected) {
-                isConnected = true;
-                return;
-            }
-        });
-
-        return isConnected;
-    }
-
-    const getEmulatorByType = (type: string): EmulatorType|undefined => {
-        let emulator: EmulatorType | undefined;
-        emulators?.map((emulatorItem: EmulatorType) => {
-            if (emulatorItem.type == type) {
-                emulator = emulatorItem;
-                return;
-            }
-        });
-
-        return emulator;
-    }
-
-    const valueToShare = {
-        emulators,
-        saveEmulator,
-        removeEmulator,
-        isEmulatorTypeConnected,
-        getEmulatorByType,
-    };
-
-    return (
-        <EmulatorContext.Provider value={valueToShare}>
-            {children}
-        </EmulatorContext.Provider>
-    );
+  return (
+    <EmulatorContext.Provider value={valueToShare}>
+      {children}
+    </EmulatorContext.Provider>
+  );
 }
 
 export { EmulatorProvider };
